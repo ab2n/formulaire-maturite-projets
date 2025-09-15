@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Checklist Interactive", layout="centered")
 st.title("📋 Checklist Interactive - Maturité de votre projet")
 
-# Questions originales
+# Questions originales pour les sliders
 questions = [
     "Je sais précisément pourquoi je veux lancer cette campagne et quel montant je souhaite atteindre",
     "J’ai une présentation claire, inspirante et convaincante de mon projet, avec une histoire qui donne envie de contribuer",
@@ -17,6 +17,19 @@ questions = [
     "Mon projet a le potentiel pour embarquer les citoyens"
 ]
 
+# Labels courts pour le radar chart
+short_labels = [
+    "Objectif",
+    "Présentation",
+    "1er cercle",
+    "Ressources",
+    "Calendrier",
+    "Plateformes",
+    "Contreparties",
+    "Suivi",
+    "Impact"
+]
+
 st.write("## Évaluez chaque point selon votre préparation (0 = pas du tout, 5 = parfaitement)")
 
 responses = []
@@ -24,10 +37,9 @@ for q in questions:
     response = st.slider(q, min_value=0, max_value=5, value=0, step=1)
     responses.append(response)
 
-# Calcul du score moyen
+# Calcul du score moyen et typologie
 average_score = sum(responses) / len(questions)
 
-# Typologie et commentaires associés
 if average_score <= 1:
     maturity = "Débutant"
     comment = "Votre projet est encore au stade initial. Il est recommandé de clarifier vos objectifs et de renforcer vos fondamentaux avant de lancer une campagne."
@@ -74,14 +86,43 @@ st.write("### 📚 Ressources recommandées pour vous")
 for title, url in resources:
     st.markdown(f"- [{title}]({url})")
 
-# Diagramme radar
+# Définir la couleur de chaque axe selon le score
+colors = []
+for val in responses:
+    if val <= 1:
+        colors.append("red")
+    elif val <= 3:
+        colors.append("yellow")
+    else:
+        colors.append("green")
+
+# Boucler pour fermer le radar
+responses_loop = responses + [responses[0]]
+short_labels_loop = short_labels + [short_labels[0]]
+colors_loop = colors + [colors[0]]
+
+# Création du radar chart avec couleur dynamique
 fig = go.Figure()
+for i in range(len(responses)):
+    fig.add_trace(go.Scatterpolar(
+        r=[0, responses[i]],
+        theta=[short_labels[i], short_labels[i]],
+        mode='lines+markers',
+        line=dict(color=colors[i], width=3),
+        marker=dict(size=8, color=colors[i]),
+        showlegend=False
+    ))
+
+# Ajouter la zone remplie
 fig.add_trace(go.Scatterpolar(
-    r=responses + [responses[0]],  # boucle pour le radar
-    theta=questions + [questions[0]],
+    r=responses_loop,
+    theta=short_labels_loop,
     fill='toself',
+    fillcolor='rgba(0,128,255,0.2)',
+    line_color='blue',
     name='Maturité'
 ))
+
 fig.update_layout(
     polar=dict(
         radialaxis=dict(
@@ -90,4 +131,5 @@ fig.update_layout(
         )),
     showlegend=False
 )
+
 st.plotly_chart(fig, use_container_width=True)
