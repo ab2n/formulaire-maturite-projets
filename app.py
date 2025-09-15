@@ -1,18 +1,19 @@
 import streamlit as st
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="Checklist Interactive", layout="centered")
 st.title("📋 Checklist Interactive - Maturité de votre projet")
 
 questions = [
-    "Je sais précisément pourquoi je veux lancer cette campagne et quel montant je souhaite atteindre",
-    "J’ai une présentation claire, inspirante et convaincante de mon projet, avec une histoire qui donne envie de contribuer",
-    "Je connais mon “1er cercle” (amis, famille, partenaires proches) et je sais comment le solliciter dès le lancement",
-    "J’ai les ressources humaines et techniques pour mener à bien ma campagne",
-    "J’ai déjà prévu un calendrier et des supports de communication (posts réseaux sociaux, mails, visuels, vidéo)",
-    "Je sais quelles plateformes correspondent le mieux à mon projet et à mon public cible",
-    "J’ai identifié des contreparties attractives, cohérentes avec mon projet et adaptées à mon public",
-    "Je sais comment remercier, fidéliser et tenir informés mes contributeurs une fois la campagne terminée",
-    "Mon projet a le potentiel pour embarquer les citoyens"
+    "Objectif et montant clair",
+    "Présentation inspirante",
+    "Connaissance du 1er cercle",
+    "Ressources disponibles",
+    "Calendrier et supports prêts",
+    "Plateformes adaptées",
+    "Contreparties attractives",
+    "Suivi des contributeurs",
+    "Potentiel citoyen"
 ]
 
 st.write("## Évaluez chaque point selon votre préparation (0 = pas du tout, 5 = parfaitement)")
@@ -22,12 +23,9 @@ for q in questions:
     response = st.slider(q, min_value=0, max_value=5, value=0, step=1)
     responses.append(response)
 
-# Calcul du score total et typologie
-total_score = sum(responses)
-max_score = len(questions) * 5
-average_score = total_score / len(questions)  # moyenne par question
+# Calcul du score moyen pour la typologie
+average_score = sum(responses) / len(questions)
 
-# Définition des typologies
 if average_score <= 1:
     maturity = "Débutant"
 elif average_score <= 2:
@@ -43,5 +41,23 @@ st.write("---")
 st.subheader("🚀 Votre typologie de maturité")
 st.info(f"Votre projet est : **{maturity}** (score moyen : {average_score:.1f}/5)")
 
-# Visualisation simple
-st.bar_chart(responses)
+# Diagramme radar
+fig = go.Figure()
+
+fig.add_trace(go.Scatterpolar(
+    r=responses + [responses[0]],  # pour boucler le radar
+    theta=questions + [questions[0]],
+    fill='toself',
+    name='Maturité'
+))
+
+fig.update_layout(
+    polar=dict(
+        radialaxis=dict(
+            visible=True,
+            range=[0,5]
+        )),
+    showlegend=False
+)
+
+st.plotly_chart(fig, use_container_width=True)
