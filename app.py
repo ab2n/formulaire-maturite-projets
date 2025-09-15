@@ -86,43 +86,14 @@ st.write("### 📚 Ressources recommandées pour vous")
 for title, url in resources:
     st.markdown(f"- [{title}]({url})")
 
-# Définir la couleur de chaque axe selon le score
-colors = []
-for val in responses:
-    if val <= 1:
-        colors.append("red")
-    elif val <= 3:
-        colors.append("yellow")
-    else:
-        colors.append("green")
-
-# Boucler pour fermer le radar
-responses_loop = responses + [responses[0]]
-short_labels_loop = short_labels + [short_labels[0]]
-colors_loop = colors + [colors[0]]
-
-# Création du radar chart avec couleur dynamique
+# Diagramme radar avec labels courts
 fig = go.Figure()
-for i in range(len(responses)):
-    fig.add_trace(go.Scatterpolar(
-        r=[0, responses[i]],
-        theta=[short_labels[i], short_labels[i]],
-        mode='lines+markers',
-        line=dict(color=colors[i], width=3),
-        marker=dict(size=8, color=colors[i]),
-        showlegend=False
-    ))
-
-# Ajouter la zone remplie
 fig.add_trace(go.Scatterpolar(
-    r=responses_loop,
-    theta=short_labels_loop,
+    r=responses + [responses[0]],  # boucle pour le radar
+    theta=short_labels + [short_labels[0]],
     fill='toself',
-    fillcolor='rgba(0,128,255,0.2)',
-    line_color='blue',
     name='Maturité'
 ))
-
 fig.update_layout(
     polar=dict(
         radialaxis=dict(
@@ -131,5 +102,4 @@ fig.update_layout(
         )),
     showlegend=False
 )
-
 st.plotly_chart(fig, use_container_width=True)
