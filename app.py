@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Checklist de préparation", layout="centered")
+st.set_page_config(page_title="Checklist Interactive", layout="centered")
 st.title("📋 Checklist Interactive - Maturité de votre projet")
 
 questions = [
@@ -15,30 +15,33 @@ questions = [
     "Mon projet a le potentiel pour embarquer les citoyens"
 ]
 
-st.write("## Évaluez chaque point selon votre préparation")
+st.write("## Évaluez chaque point selon votre préparation (0 = pas du tout, 5 = parfaitement)")
 
 responses = []
 for q in questions:
-    response = st.slider(q, min_value=0, max_value=1, value=0, step=1, format="%d")
+    response = st.slider(q, min_value=0, max_value=5, value=0, step=1)
     responses.append(response)
 
-# Calcul du score et typologie
-score = sum(responses)
-typologie_mapping = {
-    (0, 1): "Débutant",
-    (2, 3): "Émergent",
-    (4, 5): "En progression",
-    (6, 7): "Bien préparé",
-    (8, 9): "Prêt à lancer"
-}
+# Calcul du score total et typologie
+total_score = sum(responses)
+max_score = len(questions) * 5
+average_score = total_score / len(questions)  # moyenne par question
 
-for key_range, label in typologie_mapping.items():
-    if score in range(key_range[0], key_range[1]+1):
-        maturity = label
+# Définition des typologies
+if average_score <= 1:
+    maturity = "Débutant"
+elif average_score <= 2:
+    maturity = "Émergent"
+elif average_score <= 3:
+    maturity = "En progression"
+elif average_score <= 4:
+    maturity = "Bien préparé"
+else:
+    maturity = "Prêt à lancer"
 
 st.write("---")
 st.subheader("🚀 Votre typologie de maturité")
-st.info(f"Votre projet est : **{maturity}**")
+st.info(f"Votre projet est : **{maturity}** (score moyen : {average_score:.1f}/5)")
 
-# Optionnel : visualisation graphique
+# Visualisation simple
 st.bar_chart(responses)
